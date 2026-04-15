@@ -1,5 +1,4 @@
 -> Keep track of chosen node order, and order nodes added to openSet in
--> Change underlying data structure for priority queue from linked list to min binary heap
 -> Memory optimizations for CPU
 -> Extend to support 3D Grid
 -> Extend to support Nth Dimension Grid

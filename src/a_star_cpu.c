@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include "../include/grid.h"
-#include "../include/pq.h"
+#include "../include/bmh.h"
 #include "../include/a_star_cpu.h"
 
 /*
@@ -76,8 +76,8 @@ void RunAStar(Grid_2D* grid, int startIndex_x, int startIndex_y, int goalIndex_x
     Grid_Node** grid_ptr = grid->grid_ptr;
 
     // openSet - list used to choose next least expensive point
-    PriorityQueue* openSet = Init_PQ();
-    Insert_PQ(openSet, startIndex, ManhattanDistance(startIndex_x, startIndex_y, goalIndex_x, goalIndex_y)); // O(n)
+    BinaryMinHeap* openSet = Init_BMH(gridSize);
+    Insert_BMH(openSet, startIndex, ManhattanDistance(startIndex_x, startIndex_y, goalIndex_x, goalIndex_y)); // O(log n)
 
     // Current known best score from start to n
     int* gScore = (int*)malloc(sizeof(int) * gridSize);
@@ -96,19 +96,19 @@ void RunAStar(Grid_2D* grid, int startIndex_x, int startIndex_y, int goalIndex_x
 
     // Main loop - chooses next nearest reachable node
     while (openSet->size != 0) {
-        int currentId = Peek_PQ(openSet)->id;
+        int currentId = PeekMin_BMH(openSet)->id; // O(1)
         
         totalNodesSearched++;
 
         if (currentId == goalIndex) {
             printf("goal (%d, %d) distance needed: %d\n", goalIndex_x, goalIndex_y, gScore[currentId]);
             printf("total searched: %d\n", totalNodesSearched);
-            Destroy_PQ(openSet);
+            Destroy_BMH(openSet);
             free(gScore);
             return;
         }
 
-        Remove_PQ(openSet, currentId); // O(1) for head removal
+        RemoveMin_BMH(openSet); // O(1) for head removal
         grid_ptr[currentId]->data = 1.0;
 
         int* neighbors = GetNeighborIDs(grid, currentId);
@@ -126,15 +126,19 @@ void RunAStar(Grid_2D* grid, int startIndex_x, int startIndex_y, int goalIndex_x
                 gScore[neighborId] = tentative_gScore;
                 
                 int heuristicVal = ManhattanDistance(neighborId % grid->size_x, neighborId / grid->size_x, goalIndex_x, goalIndex_y);
-                Node_PQ* neighborElement = GetElementById_PQ(openSet, neighborId); // O(n)
-                if (neighborElement)
-                    Remove_PQ(openSet, neighborId); // O(n)
-                Insert_PQ(openSet, neighborId, tentative_gScore + heuristicVal); // O(n)
+                
+                if (GetElementById_BMH(openSet, neighborId)) // O(n)
+                {
+                    UpdateWeight_BMH(openSet, neighborId, tentative_gScore + heuristicVal); // O(log n)
+                } else
+                {
+                    Insert_BMH(openSet, neighborId, tentative_gScore + heuristicVal); // O(log n)
+                }
             }
         }
         free(neighbors);
     }
-    Destroy_PQ(openSet);
+    Destroy_BMH(openSet);
     free(gScore);
     fprintf(stderr, "Error<RunAStar>: Could not reach goal!\n");
 }
