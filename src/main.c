@@ -1,20 +1,23 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
+
 #include "../include/grid.h"
 #include "../include/pq.h"
 #include "../include/bmh.h"
 #include "../include/a_star_cpu.h"
+#include "../include/ndgrid_tests.h"
+
 
 int main(int argc, char* argv[]) {
     //grid test
     float* data_ptr = (float*)malloc(sizeof(int));
     *data_ptr = 0.0f;
 
-    Grid_2D* grid = CreateGrid(5, 5, data_ptr);
+    //Grid_2D* grid = CreateGrid(5, 5, data_ptr);
     *data_ptr = 0.0f;
-    PrintGridFloat(grid);
-    DestroyGrid(grid);
+    //PrintGridFloat(grid);
+    //DestroyGrid(grid);
 
     //pq test
     PriorityQueue* pq = Init_PQ();
@@ -35,17 +38,27 @@ int main(int argc, char* argv[]) {
 
     // a_star_cpu test
     printf("---------------A* Testing---------------\n");
-    Grid_2D* grid2 = CreateGrid(1024, 1024, data_ptr);
-    grid2->grid_ptr[4]->data = 2.0;
-    grid2->grid_ptr[5]->data = 2.0;
-    grid2->grid_ptr[6]->data = 2.0;
+    //Grid_2D* grid2 = CreateGrid(1024, 1024, data_ptr);
+    //grid2->grid_ptr[4]->data = 2.0;
+    //grid2->grid_ptr[5]->data = 2.0;
+    //grid2->grid_ptr[6]->data = 2.0;
+
+    Grid_2D_Device* grid3 = CreateGrid(1024, 1024, 0.0f);
+
+    grid3->data[4] = 2.0f;
+    grid3->data[5] = 2.0f;
+    grid3->data[6] = 2.0f;
 
     time_t prev = time(NULL);
-    RunAStar(grid2, 0, 0, 1023, 1023);
+    RunAStar(grid3, 0, 0, 1023, 1023);
     time_t post = time(NULL);
     printf("time: %ld\n", post - prev);
 
-    DestroyGrid(grid2);
+    //DestroyGrid(grid2);
+
+    free(grid3->data);
+    free(grid3->parent);
+    free(grid3);
 
     // bmh.c test
     BinaryMinHeap* heap = Init_BMH(7);
@@ -70,6 +83,9 @@ int main(int argc, char* argv[]) {
     Destroy_BMH(heap);
 
     free(data_ptr);
+
+    // NDGrid Testing
+    EmptyGrid_Test(4, 3);
 
     return 0;
 }

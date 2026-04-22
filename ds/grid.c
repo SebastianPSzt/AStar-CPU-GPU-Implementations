@@ -1,57 +1,102 @@
 #include<stdio.h>
 #include<stdlib.h>
+
 #include "../include/grid.h"
 
-Grid_2D* CreateGrid(int size_x, int size_y, float *default_val) {
-    Grid_2D *grid = (Grid_2D*) malloc(sizeof(Grid_2D));
+Grid_2D_Device* CreateGrid(int size_x, int size_y, float default_val) {
+    size_t totalSize = size_x * size_y;
+
+    Grid_2D_Device* grid = (Grid_2D_Device*) malloc(sizeof(Grid_2D_Device));
 
     grid->size_x = size_x;
     grid->size_y = size_y;
 
-    grid->grid_ptr = (Grid_Node**) malloc(sizeof(Grid_Node*) * size_x * size_y);
+    grid->data = (float*)malloc(sizeof(float) * totalSize);
+    grid->parent = (int*)malloc(sizeof(int)* totalSize);
 
-    for (int row = 0; row < size_y; row++) {
-        for (int col = 0; col < size_x; col++) {
-            size_t index = row * size_x + col;
-            
-            Grid_Node* node = (Grid_Node*) malloc(sizeof(Grid_Node));
-            node->data = *default_val;
-            node->parent_index = -1;
-            
-            grid->grid_ptr[index] = node;
-        }
+    for (int i = 0; i < totalSize; i++)
+    {
+        grid->data[i] = default_val;
+        grid->parent[i] = -1;
     }
 
     return grid;
 }
 
-void PrintGridFloat(Grid_2D* grid) {
+void PrintGridFloat(Grid_2D_Device* grid) {
     for (int row = 0; row < grid->size_y; row++) 
     {
         for (int col = 0; col < grid->size_x; col++) 
         {
             size_t index = row * grid->size_x + col;
-            printf("%f ", grid->grid_ptr[index]->data);
+            printf("%f ", grid->data[index]);
         }
         printf("\n");
     }
 }
 
-void UpdateGridByIndex(Grid_2D* grid, int row, int col, float* val) {
-    grid->grid_ptr[row * grid->size_x + col]->data = *val;
+void UpdateGridByIndex(Grid_2D_Device* grid, int row, int col, float val) {
+    grid->data[row * grid->size_x + col] = val;
 }
 
-void DestroyGrid(Grid_2D* grid) {
+void DestroyGrid(Grid_2D_Device* grid) {
+    free(grid->data);
+    free(grid->parent);
+    free(grid);
+}
 
-    for (int row = 0; row < grid->size_y; row++) 
+Grid_ND* CreateNDGrid(int* sizes, int dimension, float default_val) {
+    // Initialize grid
+    Grid_ND* grid = (Grid_ND*)malloc(sizeof(Grid_ND));
+
+    grid->sizes = (int*)malloc(sizeof(int) * dimension);
+    grid->dimension = dimension;
+    grid->totalSize = 1;
+
+    for (int i = 0; i < dimension; i++)
     {
-        for (int col = 0; col < grid->size_x; col++) 
-        {
-            size_t index = row * grid->size_x + col;
-            free(grid->grid_ptr[index]);
-        }
+        int size_i = sizes[i];
+        grid->sizes[i] = size_i;
+        grid->totalSize *= size_i;
     }
 
-    free(grid->grid_ptr);
+    grid->data = (float*)malloc(sizeof(float) * grid->totalSize);
+    grid->parent = (int*)malloc(sizeof(int) * grid->totalSize);    
+
+    int totalSize = grid->totalSize;
+    for (int i = 0; i < totalSize; i++)
+    {
+        grid->data[i] = default_val;
+        grid->parent[i] = -1;
+    }
+
+    return grid;
+}
+
+void UpdateNDGridByIndex(Grid_ND* grid, int* indices, float val) {
+    // y * length_x + x
+    // z * length_y * length_x + y * length_x + x
+    // For 1..D, nth dimension is scaled by length_(N+1..D)
+
+    int dim = grid->dimension;
+    int index = 0;
+
+    for (int i = 0; i < dim; i++)
+    {
+        int index_i = indices[i];
+        for (int j = i+1; j < dim; j++)
+        {
+            index_i *= grid->sizes[j];
+        }
+        index += index_i;
+    }
+
+    grid->data[index] = val;
+}
+
+void DestroyNDGrid(Grid_ND* grid) {
+    free(grid->data);
+    free(grid->parent);
+    free(grid->sizes);
     free(grid);
 }

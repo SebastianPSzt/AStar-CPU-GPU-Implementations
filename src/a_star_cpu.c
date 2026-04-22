@@ -26,7 +26,7 @@ Values:
 2 = right
 3 = bottom
 */
-int* GetNeighborIDs(Grid_2D* grid, int currentId) {
+int* GetNeighborIDs(Grid_2D_Device* grid, int currentId) {
     int size_x = grid->size_x;
     int size_y = grid->size_y;
     int currentId_x = currentId % size_x;
@@ -62,7 +62,7 @@ int ManhattanDistance(int col1, int row1, int col2, int row2) {
     return abs(col1-col2) + abs(row1-row2);
 }
 
-void RunAStar(Grid_2D* grid, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y) {
+void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y) {
     // Variables
     int totalNodesSearched = 0;
 
@@ -73,7 +73,8 @@ void RunAStar(Grid_2D* grid, int startIndex_x, int startIndex_y, int goalIndex_x
     int startIndex = startIndex_y * gridSize_x + startIndex_x;
     int goalIndex = goalIndex_y * gridSize_x + goalIndex_x;
 
-    Grid_Node** grid_ptr = grid->grid_ptr;
+    float* gridData = grid->data;
+    int* parent = grid->parent;
 
     // openSet - list used to choose next least expensive point
     BinaryMinHeap* openSet = Init_BMH(gridSize);
@@ -109,20 +110,20 @@ void RunAStar(Grid_2D* grid, int startIndex_x, int startIndex_y, int goalIndex_x
         }
 
         RemoveMin_BMH(openSet); // O(1) for head removal
-        grid_ptr[currentId]->data = 1.0;
+        gridData[currentId] = 1.0;
 
         int* neighbors = GetNeighborIDs(grid, currentId);
         for (int i = 0; i <= 3; i++) {
             int neighborId = neighbors[i];
-            printf("neigbor: %d\n", neighborId);
+            //printf("neigbor: %d\n", neighborId);
 
             if (CheckIfOutOfBounds(neighborId) == 1) continue;
-            if (grid_ptr[neighborId]->data==2.0) continue;
-            if (grid_ptr[neighborId]->data==1.0) continue; // Must be removed to get optimal path if heuristic function is not consistent
+            if (gridData[neighborId]==2.0) continue;
+            if (gridData[neighborId]==1.0) continue; // Must be removed to get optimal path if heuristic function is not consistent
 
             int tentative_gScore = gScore[currentId] + 1;
             if (tentative_gScore < gScore[neighborId]) {
-                grid_ptr[neighborId]->parent_index = currentId;
+                parent[neighborId] = currentId;
                 gScore[neighborId] = tentative_gScore;
                 
                 int heuristicVal = ManhattanDistance(neighborId % grid->size_x, neighborId / grid->size_x, goalIndex_x, goalIndex_y);

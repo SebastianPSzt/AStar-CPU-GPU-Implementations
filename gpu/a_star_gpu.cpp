@@ -1,13 +1,13 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include<string.h>
-#include<time.h>
+#include <string.h>
+#include <time.h>
 
 #include "../include/grid.h"
 #include "../include/bmh.h"
 
-#include"cuda_intellisense_fix.h"
+#include "cuda_intellisense_fix.h"
 
 // Device Memory Pointers
 static int* gScore_d;
