@@ -143,3 +143,15 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
     free(gScore);
     fprintf(stderr, "Error<RunAStar>: Could not reach goal!\n");
 }
+
+void InitAStar() {
+
+}
+
+void PrintAStar() {
+
+}
+
+void FreeAStar() {
+    
+}

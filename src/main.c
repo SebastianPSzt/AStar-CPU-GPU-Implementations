@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
     EmptyGrid_Test(4, 3);
 
     printf("---------------Maze Generator Testing---------------\n");
-    Grid_2D_Device* grid4 = GenerateMaze(10, 10, 0, 0, 4, 4);
+    Grid_2D_Device* grid4 = GenerateMaze(4, 4, 0, 0, 4, 2);
     PrintGrid(grid4);
 
     return 0;
