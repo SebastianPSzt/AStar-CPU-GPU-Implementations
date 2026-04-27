@@ -1,28 +1,37 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "../include/grid.h"
 #include "../include/pq.h"
 #include "../include/bmh.h"
 #include "../include/a_star_cpu.h"
+#include "../include/search_log_cpu.h"
 
-int main(int argc, char* argv[]) {
-    //grid test
-    float* data_ptr = (float*)malloc(sizeof(int));
-    *data_ptr = 0.0f;
-
-    // a_star_cpu test
+int main(int argc, char *argv[])
+{
     printf("---------------A* Testing---------------\n");
-    Grid_2D* grid2 = CreateGrid(1024, 1024, data_ptr);
-    grid2->grid_ptr[4]->data = 2.0;
-    grid2->grid_ptr[5]->data = 2.0;
-    grid2->grid_ptr[6]->data = 2.0;
 
-    RunAStar(grid2, 0, 0, 1023, 1023);
+    Grid_2D *grid = GatherGrid("./godot/grids/region.json");
+    if (!grid)
+    {
+        printf("Failed to load grid from JSON\n");
+        return 1;
+    }
+    PrintGridFloat(grid);
 
-    DestroyGrid(grid2);
+    int start_x = 0;
+    int start_y = 0;
+    int goal_x = grid->size_x - 1;
+    int goal_y = grid->size_y - 1;
 
-    free(data_ptr);
+    SearchLogNode *log = RunAStar(grid, start_x, start_y, goal_x, goal_y);
+
+    log = ReverseLog(log);
+    PrintSearchLog(log);
+
+    FreeSearchLog(log);
+
+    DestroyGrid(grid);
 
     return 0;
 }

@@ -1,0 +1,6 @@
+[configuration]
+entry_symbol = "astar_library_init"
+compatibility_minimum = "4.2"
+
+[libraries]
+windows.debug.x86_64 = "res://bin/astar_cpu_wrapper.dll"
