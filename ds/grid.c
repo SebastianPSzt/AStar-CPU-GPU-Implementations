@@ -23,13 +23,13 @@ Grid_2D_Device* CreateGrid(int size_x, int size_y, float default_val) {
     return grid;
 }
 
-void PrintGridFloat(Grid_2D_Device* grid) {
+void PrintGrid(Grid_2D_Device* grid) {
     for (int row = 0; row < grid->size_y; row++) 
     {
         for (int col = 0; col < grid->size_x; col++) 
         {
             size_t index = row * grid->size_x + col;
-            printf("%f ", grid->data[index]);
+            printf("%d ", (int)(grid->data[index]));
         }
         printf("\n");
     }

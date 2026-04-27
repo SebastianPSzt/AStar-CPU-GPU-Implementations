@@ -98,7 +98,7 @@ void Run_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goa
         // Move next values to past
         cudaMemcpy(&frontier_size_h, nextFrontier_size_d, sizeof(int), cudaMemcpyDeviceToHost);
         
-        // Swap
+        // Swap (ptrs, quicker than copying over)
         int* temp = frontier_d;
         frontier_d = nextFrontier_d;
         nextFrontier_d = temp;
