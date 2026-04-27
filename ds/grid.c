@@ -25,6 +25,10 @@ Grid_2D* CreateGrid(int size_x, int size_y, float *default_val) {
     return grid;
 }
 
+Grid_2D* GatherGrid(const char* path) {
+
+}
+
 void PrintGridFloat(Grid_2D* grid) {
     for (int row = 0; row < grid->size_y; row++) 
     {

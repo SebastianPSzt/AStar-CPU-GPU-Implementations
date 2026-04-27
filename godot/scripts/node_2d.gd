@@ -1,10 +1,10 @@
 extends Node2D
 
-var width = 576
-var height = 324
+var width = 1024
+var height = 1024
 var perlin_scale = 0.75
-var threshold = 0
-var cell_size = 2
+var threshold = 0.1
+var cell_size = 1
 var seed = randi()
 var save_path = "C:/Users/thysv/source/AStar-CPU-GPU-Implementations/godot/grids/region.json"
 
