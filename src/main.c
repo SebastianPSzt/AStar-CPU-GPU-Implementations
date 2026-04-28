@@ -1,6 +1,5 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include<time.h>
 
 #include "../include/grid.h"
 #include "../include/pq.h"
@@ -11,6 +10,40 @@
 
 
 int main(int argc, char* argv[]) {
+    printf("---------------A* Testing---------------\n");
+    Grid_2D_Device* grid3 = CreateGrid(4, 4, 0);
+    AStar_Output* output = InitOutputContainer(4 * 4);
+
+    grid3->data[4] = 2;
+    grid3->data[5] = 2;
+    grid3->data[6] = 2;
+
+    RunAStar(grid3, 0, 0, 0, 2, output);
+    
+    printf("Best cost: %d, nodes explored: %d, path length: %d\n", output->bestCost, output->nodesExplored, output->pathSize);
+
+    if (output->validPath) {
+        for (int i = 0; i < output->pathSize; i++) {
+            printf("Node: %d\n", output->path[i]);
+        }
+    }
+
+    DestroyGrid(grid3);
+    DestroyOutputContainer(output);
+
+    printf("---------------Maze Generator Testing---------------\n");
+    int* seed = (int*)malloc(sizeof(int));
+    *seed = 4;
+
+    Grid_2D_Device* grid4 = GenerateMaze(10, 10, 0, 0, 4, 2, seed);
+    PrintGrid(grid4);
+    
+    free(seed);
+
+    return 0;
+}
+
+    /*
     //grid test
     int* data_ptr = (int*)malloc(sizeof(int));
     *data_ptr = 0;
@@ -35,31 +68,9 @@ int main(int argc, char* argv[]) {
     }
 
     Destroy_PQ(pq);
+    */
 
-    // a_star_cpu test
-    printf("---------------A* Testing---------------\n");
-    //Grid_2D* grid2 = CreateGrid(1024, 1024, data_ptr);
-    //grid2->grid_ptr[4]->data = 2.0;
-    //grid2->grid_ptr[5]->data = 2.0;
-    //grid2->grid_ptr[6]->data = 2.0;
-
-    Grid_2D_Device* grid3 = CreateGrid(4, 4, 0);
-
-    grid3->data[4] = 2;
-    grid3->data[5] = 2;
-    grid3->data[6] = 2;
-
-    time_t prev = time(NULL);
-    RunAStar(grid3, 0, 0, 0, 2);
-    time_t post = time(NULL);
-    printf("time: %ld\n", post - prev);
-
-    //DestroyGrid(grid2);
-
-    free(grid3->data);
-    free(grid3->parent);
-    free(grid3);
-
+    /*
     // bmh.c test
     BinaryMinHeap* heap = Init_BMH(7);
 
@@ -86,10 +97,4 @@ int main(int argc, char* argv[]) {
 
     // NDGrid Testing
     EmptyGrid_Test(4, 3);
-
-    printf("---------------Maze Generator Testing---------------\n");
-    Grid_2D_Device* grid4 = GenerateMaze(4, 4, 0, 0, 4, 2);
-    PrintGrid(grid4);
-
-    return 0;
-}
+    */

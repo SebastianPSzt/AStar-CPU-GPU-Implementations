@@ -101,8 +101,11 @@ void GenerateMaze_Step(Grid_2D_Device* grid, int index_x, int index_y) {
     free(neighbors);
 }
 
-Grid_2D_Device* GenerateMaze(int size_x, int size_y, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y) {
+Grid_2D_Device* GenerateMaze(int size_x, int size_y, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y, int* randomSeed) {
     // goal unused for now.
+    if (randomSeed != NULL) {
+        srand(*randomSeed);
+    }
 
     Grid_2D_Device* grid = CreateGrid(size_x, size_y, 2);
     

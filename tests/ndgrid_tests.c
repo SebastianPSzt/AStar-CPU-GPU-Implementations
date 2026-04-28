@@ -20,11 +20,11 @@ void EmptyGrid_Test(int dimension, int size) {
 
     int sum = 0;
     for (int i = 0; i < grid->totalSize; i++){
-        printf("%f\n", grid->data[i]);
+        printf("%d\n", grid->data[i]);
         sum += grid->data[i];
     }
 
-    printf("Dim: %d, Size: %d, Sum: %f, equal: %d\n", dimension, size, sum, sum == pow(size, dimension));
+    printf("Dim: %d, Size: %d, Sum: %d, equal: %d\n", dimension, size, sum, sum == pow(size, dimension));
 
     DestroyNDGrid(grid);
     free(sizes);

@@ -6,6 +6,7 @@
 
 #include "../include/a_star_gpu_4.h"
 #include "../include/grid.h"
+#include "../include/a_star_output.h"
 #include "../include/dfs_maze_generator.h"
 
 #include "cuda_intellisense_fix.h"
@@ -131,7 +132,7 @@ int* bestMeetIndex_d)
 
 // CPU
 void Run_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y, int* forward_gScore_d, int* backward_gScore_d, 
-int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, int* bestMeetCost_d, int* bestMeetIndex_d, int startBucket) {
+int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, int* bestMeetCost_d, int* bestMeetIndex_d, int startBucket, AStar_Output* output) {
     // ----- Variables -----
     int gridSize_x = grid->size_x;
     int gridSize_y = grid->size_y;
@@ -160,6 +161,9 @@ int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, i
         free(bucket_sizes_h);
 
         if (currentBucket == -1) break;
+        
+        // Count number of nodes explored
+        output->nodesExplored += currentBucketSize;
         
         // Compute #thread_blocks (guaranteed to be >=1 if non-empty bucket exists; always rounds up)
         size_t numBlocks = (currentBucketSize + 255) / 256;
@@ -194,7 +198,8 @@ int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, i
     }
 }
 
-void Init_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y, int print) {
+void Init_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y, 
+int print, AStar_Output* output) {
     // ----- Variables -----
     int gridSize_x = grid->size_x;
     int gridSize_y = grid->size_y;
@@ -270,7 +275,10 @@ void Init_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int go
 
     // ----- Call AStar Functions -----
     Run_AStar(grid, startIndex_x, startIndex_y, goalIndex_x, goalIndex_y, forward_gScore_d, backward_gScore_d, 
-    gridData_d, bucket_sizes_d, bucket_nodes_d, next_bucket_d, bestMeetCost_d, bestMeetIndex_d, startBucket);
+    gridData_d, bucket_sizes_d, bucket_nodes_d, next_bucket_d, bestMeetCost_d, bestMeetIndex_d, startBucket, output);
+
+    // bestCost for output
+    cudaMemcpy(&(output->bestCost), bestMeetCost_d, sizeof(int), cudaMemcpyDeviceToHost);
 
     if (print) {
         int* bestMeetCost_h = (int*)malloc(sizeof(int));
@@ -285,7 +293,7 @@ void Init_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int go
 
         int reachedPath = (*bestMeetCost_h == INT_MAX) ? 0 : 1;
 
-        Print_AStar(grid, reachedPath, *bestMeetCost_h, forward_gScore_h, backward_gScore_h, startIndex, goalIndex, *bestMeetIndex_h);
+        Print_AStar(grid, reachedPath, *bestMeetCost_h, forward_gScore_h, backward_gScore_h, startIndex, goalIndex, *bestMeetIndex_h, output);
 
         free(bestMeetCost_h);
         free(bestMeetIndex_h);
@@ -293,7 +301,8 @@ void Init_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int go
         free(backward_gScore_h);
     }
 
-    Clean_AStar(gScore, forward_gScore_d, backward_gScore_d, gridData_d, bucket_sizes_d, bucket_nodes_d, next_bucket_d, bestMeetCost_d, bestMeetIndex_d);
+    Clean_AStar(gScore, forward_gScore_d, backward_gScore_d, gridData_d, bucket_sizes_d, bucket_nodes_d, next_bucket_d, 
+    bestMeetCost_d, bestMeetIndex_d);
 }
 
 /**
@@ -339,18 +348,22 @@ int GetPathFromStartToGoal(Grid_2D_Device* grid, int* gScore, int startIndex, in
 }
 
 void Print_AStar(Grid_2D_Device* grid, int reachedPath, int bestCost, int* forward_gScore_h, int* backward_gScore_h, 
-int startIndex, int goalIndex, int bestMeetIndex) {
+int startIndex, int goalIndex, int bestMeetIndex, AStar_Output* output) {
     if (!reachedPath) {
-        printf("Could not find path between start and goal indices\n");
+        //printf("Could not find path between start and goal indices\n");
         return;
     }
     
-    printf("----------------------------------------------\n");
+    // Set validPath in output
+    output->validPath = 1;
     
-    printf ("(%d -> %d) Cost: %d\n", startIndex, goalIndex, bestCost);
+    //printf("----------------------------------------------\n");
     
-    printf("----------------------------------------------\n");
-    printf("Path from start to goal:\n");
+    //printf ("(%d -> %d) Cost: %d\n", startIndex, goalIndex, bestCost);
+    //printf("Total nodes explored: %d\n", output->nodesExplored);
+    
+    //printf("----------------------------------------------\n");
+    //printf("Path from start to goal:\n");
 
     int* path_firstHalf = (int*)malloc(sizeof(int) * grid->size_x * grid->size_y);
     int length_firstHalf = GetPathFromStartToGoal(grid, forward_gScore_h, startIndex, bestMeetIndex, path_firstHalf);
@@ -360,13 +373,17 @@ int startIndex, int goalIndex, int bestMeetIndex) {
 
     for (int i = 0; i < length_firstHalf; i++) {
         int index = length_firstHalf - 1 - i;
-        printf("Grid_Index: %d\n", path_firstHalf[index]);
+        //printf("Grid_Index: %d\n", path_firstHalf[index]);
+        output->path[i] = path_firstHalf[index];
     }
 
     for (int i = 1; i < length_secondHalf; i++) {
         int index = i;
-        printf("Grid_Index: %d\n", path_secondHalf[index]);
+        //printf("Grid_Index: %d\n", path_secondHalf[index]);
+        output->path[length_firstHalf + i - 1] = path_secondHalf[index];
     }
+
+    output->pathSize = length_firstHalf + length_secondHalf - 1; // do not count middle length twice
 
     free(path_firstHalf);
     free(path_secondHalf);
@@ -374,8 +391,8 @@ int startIndex, int goalIndex, int bestMeetIndex) {
     printf("----------------------------------------------\n");
 }
 
-void Clean_AStar(int* gScore, int* forward_gScore_d, int* backward_gScore_d, int* gridData_d, 
-int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, int* bestMeetCost_d, int* bestMeetIndex_d) {
+void Clean_AStar(int* gScore, int* forward_gScore_d, int* backward_gScore_d, int* gridData_d, int* bucket_sizes_d, 
+int* bucket_nodes_d, int* next_bucket_d, int* bestMeetCost_d, int* bestMeetIndex_d) {
     // ----- Host Deallocation -----
     free(gScore);
 
@@ -398,15 +415,26 @@ int main(int argc, char* argv[]) {
     cudaMemcpyToSymbol(offset_x, offset_xh, sizeof(int) * 4, 0, cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(offset_y, offset_yh, sizeof(int) * 4, 0, cudaMemcpyHostToDevice);
 
-    Grid_2D_Device* myGrid = CreateGrid(4, 4, 0);
+    int gridSize_x = 4;
+    int gridSize_y = 4;
+
+    Grid_2D_Device* myGrid = CreateGrid(gridSize_x, gridSize_y, 0);
     
     myGrid->data[4] = 2;
     myGrid->data[5] = 2;
     myGrid->data[6] = 2;
 
-    Init_AStar(myGrid, 0, 0, 0, 2, 0);
+    AStar_Output* output = InitOutputContainer(gridSize_x * gridSize_y);
+
+    Init_AStar(myGrid, 0, 0, 0, 2, 1, output);
+
+    printf("Total cost: %d, nodes visited: %d, path length: %d\n", output->bestCost, output->nodesExplored, output->pathSize);
+    for (int i = 0; i < output->pathSize; i++) {
+        printf("Node: %d\n", output->path[i]);
+    }
 
     DestroyGrid(myGrid);
+    DestroyOutputContainer(output);
 }
 
 /*
@@ -414,4 +442,11 @@ int main(int argc, char* argv[]) {
 4  5  6  7
 8  9  10 11
 12 13 14 15
+*/
+
+/*
+Return: (All GPU versions and CPU must have)
+-> Nodes explored ✅
+-> Path (start-goal inclusive) ✅
+-> Best cost ✅
 */

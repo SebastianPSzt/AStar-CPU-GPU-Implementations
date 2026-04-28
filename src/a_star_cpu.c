@@ -1,9 +1,11 @@
 #include<limits.h>
 #include<stdio.h>
 #include<stdlib.h>
+
+#include "../include/a_star_cpu.h"
 #include "../include/grid.h"
 #include "../include/bmh.h"
-#include "../include/a_star_cpu.h"
+#include "../include/a_star_output.h"
 
 /*
 Need for visuals:
@@ -62,7 +64,31 @@ int ManhattanDistance(int col1, int row1, int col2, int row2) {
     return abs(col1-col2) + abs(row1-row2);
 }
 
-void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y) {
+void GetPathFromParents(Grid_2D_Device* grid, int startIndex, int goalIndex, AStar_Output* output) {
+    if (!output->validPath) return;
+
+    int* parents = grid->parent;
+    int currentIndex = goalIndex;
+
+    // Get path from parents list
+    while (currentIndex != startIndex) {
+        output->path[output->pathSize++] = currentIndex;
+        currentIndex = parents[currentIndex];
+    }
+
+    // Add start index to path
+    output->path[output->pathSize++] = startIndex;
+
+    // reverse path list
+    int* newPath = (int*)malloc(sizeof(int) * output->pathSize);
+    for (int i = 0; i < output->pathSize; i++) {
+        newPath[i] = output->path[output->pathSize - 1 - i];
+    }
+    free(output->path);
+    output->path = newPath;
+}
+
+void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y, AStar_Output* output) {
     // Variables
     int totalNodesSearched = 0;
 
@@ -102,8 +128,12 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
         totalNodesSearched++;
 
         if (currentId == goalIndex) {
-            printf("goal (%d, %d) distance needed: %d\n", goalIndex_x, goalIndex_y, gScore[currentId]);
-            printf("total searched: %d\n", totalNodesSearched);
+            //printf("goal (%d, %d) distance needed: %d\n", goalIndex_x, goalIndex_y, gScore[currentId]);
+            //printf("total searched: %d\n", totalNodesSearched);
+            output->validPath = 1;
+            output->bestCost = gScore[currentId];
+            output->nodesExplored = totalNodesSearched;
+            GetPathFromParents(grid, startIndex, goalIndex, output);
             Destroy_BMH(openSet);
             free(gScore);
             return;
@@ -142,9 +172,4 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
     Destroy_BMH(openSet);
     free(gScore);
     fprintf(stderr, "Error<RunAStar>: Could not reach goal!\n");
-}
-
-void PrintAStar(Grid_2D_Device* grid, int startIndex, int goalIndex) {
-    int index = goalIndex;
-    while (index != startIndex) {}
 }
