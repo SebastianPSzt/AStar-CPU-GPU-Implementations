@@ -16,9 +16,9 @@ void EmptyGrid_Test(int dimension, int size) {
         sizes[i] = size;
     }
 
-    Grid_ND* grid = CreateNDGrid(sizes, dimension, 1.0f);
+    Grid_ND* grid = CreateNDGrid(sizes, dimension, 1);
 
-    float sum = 0;
+    int sum = 0;
     for (int i = 0; i < grid->totalSize; i++){
         printf("%f\n", grid->data[i]);
         sum += grid->data[i];

@@ -73,7 +73,7 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
     int startIndex = startIndex_y * gridSize_x + startIndex_x;
     int goalIndex = goalIndex_y * gridSize_x + goalIndex_x;
 
-    float* gridData = grid->data;
+    int* gridData = grid->data;
     int* parent = grid->parent;
 
     // openSet - list used to choose next least expensive point
@@ -84,7 +84,7 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
     int* gScore = (int*)malloc(sizeof(int) * gridSize);
 
     // Best guess of cost from start to finish when going through n : fScore[n] = gScore[n] + h(n)
-    //float* fScore = (float*)malloc(sizeof(float) * gridSize);
+    //int* fScore = (int*)malloc(sizeof(int) * gridSize);
     
     for (int i = 0; i < gridSize; i++) 
     {
@@ -153,5 +153,5 @@ void PrintAStar() {
 }
 
 void FreeAStar() {
-    
+
 }

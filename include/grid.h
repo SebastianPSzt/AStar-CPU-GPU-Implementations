@@ -3,7 +3,7 @@
 
 // Structs
 typedef struct Grid_2D_Device {
-    float* data;
+    int* data;
     int* parent;
     int size_x;
     int size_y;
@@ -11,7 +11,7 @@ typedef struct Grid_2D_Device {
 
 // Uniform grid
 typedef struct Grid_ND {
-    float* data;
+    int* data;
     int* parent;
     int* sizes;
 
@@ -21,14 +21,14 @@ typedef struct Grid_ND {
 
 // Functions
 // 2D
-Grid_2D_Device* CreateGrid(int size_x, int size_y, float default_val);
-void UpdateGridByIndex(Grid_2D_Device* grid, int row, int col, float val);
+Grid_2D_Device* CreateGrid(int size_x, int size_y, int default_val);
+void UpdateGridByIndex(Grid_2D_Device* grid, int row, int col, int val);
 void PrintGrid(Grid_2D_Device* grid);
 void DestroyGrid(Grid_2D_Device* grid);
 
 // ND
-Grid_ND* CreateNDGrid(int* sizes, int dimension, float default_val);
-void UpdateNDGridByIndex(Grid_ND* grid, int* indices, float val);
+Grid_ND* CreateNDGrid(int* sizes, int dimension, int default_val);
+void UpdateNDGridByIndex(Grid_ND* grid, int* indices, int val);
 void DestroyNDGrid(Grid_ND* grid);
 
 #endif

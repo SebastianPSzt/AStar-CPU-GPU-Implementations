@@ -14,7 +14,7 @@ __constant__ int offset_y[4];
 
 // GPU
 __device__ void MultiFrontierExpansion(int* frontier_d, int* nextFrontier_d, int frontier_size_h, int* nextFrontier_size_d,
-int* gScore_d, int* parent_d, int gridSize_x, int gridSize_y, float* gridData_d) {
+int* gScore_d, int* parent_d, int gridSize_x, int gridSize_y, int* gridData_d) {
     int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id >= frontier_size_h) return;
 
@@ -28,7 +28,7 @@ int* gScore_d, int* parent_d, int gridSize_x, int gridSize_y, float* gridData_d)
         int neighborIndex = neighborIndex_y * gridSize_x + neighborIndex_x;
 
         if (neighborIndex_x < 0 || neighborIndex_x >= gridSize_x || neighborIndex_y < 0 || neighborIndex_y >= gridSize_y) continue;
-        if (gridData_d[neighborIndex] == 2.0f) continue;
+        if (gridData_d[neighborIndex] == 2) continue;
 
         int newVal = gScore_d[index] + 1;
         int oldVal = atomicMin(&gScore_d[neighborIndex], newVal);
@@ -57,7 +57,7 @@ void Run_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goa
 
     int frontier_size_h = 1; // read-only primitive on device-side so no need to allocate memory
 
-    // No need to set grid elements to 1.0f anymore
+    // No need to set grid elements to 1 anymore
     // No f-score for now (search dijkstra-style)
 
     int* gScore_d;
@@ -78,9 +78,9 @@ void Run_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goa
     int* nextFrontier_size_d;
     cudaMalloc((void**)&nextFrontier_size_d, sizeof(int));
 
-    float* gridData_d;
-    cudaMalloc((void**)&gridData_d, sizeof(float)*gridSize);
-    cudaMemcpy(gridData_d, grid->data, sizeof(float)*gridSize, cudaMemcpyHostToDevice);
+    int* gridData_d;
+    cudaMalloc((void**)&gridData_d, sizeof(int)*gridSize);
+    cudaMemcpy(gridData_d, grid->data, sizeof(int)*gridSize, cudaMemcpyHostToDevice);
 
     // Keep going till no more nodes in frontier to explore
     while (frontier_size_h > 0) {
@@ -139,11 +139,11 @@ int main(int argc, char* argv[]) {
     cudaMemcpyToSymbol(offset_x, offset_xh, sizeof(int) * 4, 0, cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(offset_y, offset_yh, sizeof(int) * 4, 0, cudaMemcpyHostToDevice);
 
-    Grid_2D_Device* myGrid = CreateGrid(4, 4, 0.0f);
+    Grid_2D_Device* myGrid = CreateGrid(4, 4, 0);
     
-    myGrid->data[4] = 2.0f;
-    myGrid->data[5] = 2.0f;
-    myGrid->data[6] = 2.0f;
+    myGrid->data[4] = 2;
+    myGrid->data[5] = 2;
+    myGrid->data[6] = 2;
 
     Run_AStar(myGrid, 0, 0, 0, 2);
 
