@@ -3,7 +3,7 @@
 
 #include "../include/grid.h"
 
-Grid_2D_Device* CreateGrid(int size_x, int size_y, float default_val) {
+Grid_2D_Device* CreateGrid(int size_x, int size_y, int default_val) {
     size_t totalSize = size_x * size_y;
 
     Grid_2D_Device* grid = (Grid_2D_Device*) malloc(sizeof(Grid_2D_Device));
@@ -11,7 +11,7 @@ Grid_2D_Device* CreateGrid(int size_x, int size_y, float default_val) {
     grid->size_x = size_x;
     grid->size_y = size_y;
 
-    grid->data = (float*)malloc(sizeof(float) * totalSize);
+    grid->data = (int*)malloc(sizeof(int) * totalSize);
     grid->parent = (int*)malloc(sizeof(int)* totalSize);
 
     for (int i = 0; i < totalSize; i++)
@@ -35,7 +35,7 @@ void PrintGrid(Grid_2D_Device* grid) {
     }
 }
 
-void UpdateGridByIndex(Grid_2D_Device* grid, int row, int col, float val) {
+void UpdateGridByIndex(Grid_2D_Device* grid, int row, int col, int val) {
     grid->data[row * grid->size_x + col] = val;
 }
 
@@ -45,7 +45,7 @@ void DestroyGrid(Grid_2D_Device* grid) {
     free(grid);
 }
 
-Grid_ND* CreateNDGrid(int* sizes, int dimension, float default_val) {
+Grid_ND* CreateNDGrid(int* sizes, int dimension, int default_val) {
     // Initialize grid
     Grid_ND* grid = (Grid_ND*)malloc(sizeof(Grid_ND));
 
@@ -60,7 +60,7 @@ Grid_ND* CreateNDGrid(int* sizes, int dimension, float default_val) {
         grid->totalSize *= size_i;
     }
 
-    grid->data = (float*)malloc(sizeof(float) * grid->totalSize);
+    grid->data = (int*)malloc(sizeof(int) * grid->totalSize);
     grid->parent = (int*)malloc(sizeof(int) * grid->totalSize);    
 
     int totalSize = grid->totalSize;
@@ -73,7 +73,7 @@ Grid_ND* CreateNDGrid(int* sizes, int dimension, float default_val) {
     return grid;
 }
 
-void UpdateNDGridByIndex(Grid_ND* grid, int* indices, float val) {
+void UpdateNDGridByIndex(Grid_ND* grid, int* indices, int val) {
     // y * length_x + x
     // z * length_y * length_x + y * length_x + x
     // For 1..D, nth dimension is scaled by length_(N+1..D)

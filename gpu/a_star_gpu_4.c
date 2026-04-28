@@ -159,8 +159,18 @@ int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, i
         }
 
         free(bucket_sizes_h);
+<<<<<<< HEAD
 
         if (currentBucket == -1) break;
+=======
+        
+        //SmallestBucketReduction<<<1, NUM_BUCKETS>>>(bucket_sizes_d, currentBucket, next_bucket_d);
+        //cudaMemcpy(&currentBucket, next_bucket_d, sizeof(int), cudaMemcpyDeviceToHost);
+
+        if (currentBucket == -1) break;
+
+        //cudaMemcpy(&currentBucketSize, &bucket_sizes_d[currentBucket], sizeof(int), cudaMemcpyDeviceToHost);
+>>>>>>> lowestBucketOpt
         
         // Compute #thread_blocks (guaranteed to be >=1 if non-empty bucket exists; always rounds up)
         size_t numBlocks = (currentBucketSize + 255) / 256;

@@ -11,7 +11,7 @@
 
 // Device Memory Pointers
 static int* gScore_d;
-static float* gridData_d;
+static int* gridData_d;
 static int* parent_d;
 static int* buf_d; // [neighborIndex0, newOpenSetCost0, ...]
 
@@ -26,7 +26,7 @@ __host__ __device__ int ManhattanDistance(int x1, int y1, int x2, int y2) {
     return abs(x2 - x1) + abs(y2 - y1);
 }
 
-__global__ void NeighborEvaluation(int* gScore, float* gridData, int* parent, int gridSize_x, int gridSize_y, 
+__global__ void NeighborEvaluation(int* gScore, int* gridData, int* parent, int gridSize_x, int gridSize_y, 
 int currentIndex, int goalIndex, int* buf) {
     // Thread id
     int id = threadIdx.x;
@@ -55,8 +55,8 @@ int currentIndex, int goalIndex, int* buf) {
     buf[id*2] = neighborIndex;
 
     // Ensure neighboring point has not been visited and is not blocked, else return
-    if (gridData[neighborIndex] == 1.0f) return; // consistent, admissable heuristic
-    if (gridData[neighborIndex] == 2.0f) return;
+    if (gridData[neighborIndex] == 1) return; // consistent, admissable heuristic
+    if (gridData[neighborIndex] == 2) return;
 
     // A* neighbor update step    
     int tentative_gScore = gScore[currentIndex] + 1;
@@ -100,13 +100,13 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
         }
 
         RemoveMin_BMH(openSet);
-        grid->data[currentIndex] = 1.0f; // Must be removed if heuristic fn is admissable but not consistent
+        grid->data[currentIndex] = 1; // Must be removed if heuristic fn is admissable but not consistent
 
         int* buf_h = (int*)malloc(sizeof(int) * 8);
         memset(buf_h, -1, 8 * sizeof(int));
 
         cudaMemcpy(gScore_d, gScore, sizeof(int) * gridSize, cudaMemcpyHostToDevice);
-        cudaMemcpy(gridData_d, grid->data, sizeof(float) * gridSize, cudaMemcpyHostToDevice);
+        cudaMemcpy(gridData_d, grid->data, sizeof(int) * gridSize, cudaMemcpyHostToDevice);
         cudaMemcpy(parent_d, grid->parent, sizeof(int) * gridSize, cudaMemcpyHostToDevice);
         cudaMemcpy(buf_d, buf_h, sizeof(int) * 8, cudaMemcpyHostToDevice);
 
@@ -114,7 +114,7 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
         cudaDeviceSynchronize();
 
         cudaMemcpy(gScore, gScore_d, sizeof(int) * gridSize, cudaMemcpyDeviceToHost);
-        cudaMemcpy(grid->data, gridData_d, sizeof(float) * gridSize, cudaMemcpyDeviceToHost);
+        cudaMemcpy(grid->data, gridData_d, sizeof(int) * gridSize, cudaMemcpyDeviceToHost);
         cudaMemcpy(grid->parent, parent_d, sizeof(int) * gridSize, cudaMemcpyDeviceToHost);
         cudaMemcpy(buf_h, buf_d, sizeof(int) * 8, cudaMemcpyDeviceToHost);
 
@@ -175,17 +175,17 @@ int main(int argc, char* argv[]) {
     myGrid->size_x = 4;
     myGrid->size_y = 4;
 
-    myGrid->data = (float*)malloc(sizeof(float)*16);
+    myGrid->data = (int*)malloc(sizeof(int)*16);
     myGrid->parent = (int*)malloc(sizeof(int)*16);
 
     for (int i = 0; i<16; i++) {
-        myGrid->data[i] = 0.0f;
+        myGrid->data[i] = 0;
         myGrid->parent[i] = 0;
     }
 
-    myGrid->data[4] = 2.0f;
-    myGrid->data[5] = 2.0f;
-    myGrid->data[6] = 2.0f;
+    myGrid->data[4] = 2;
+    myGrid->data[5] = 2;
+    myGrid->data[6] = 2;
 
     time_t prevTime = time(NULL);
     RunAStar_GP(myGrid, 0, 0, 0, 2);

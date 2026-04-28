@@ -53,7 +53,7 @@ int GetUnvisitedNeighbors(Grid_2D_Device* grid, int index_x, int index_y, int* n
         int neighborIndex = neighborIndex_y * grid->size_x + neighborIndex_x;
 
         if (!ValidNeighbor(grid, neighborIndex_x, neighborIndex_y)) continue;
-        if (grid->data[neighborIndex] == 0.0f) continue;
+        if (grid->data[neighborIndex] == 0) continue;
         
         neighbors[validNeighbors] = neighborIndex_y * grid->size_x + neighborIndex_x;
         validNeighbors++;
@@ -65,7 +65,7 @@ int GetUnvisitedNeighbors(Grid_2D_Device* grid, int index_x, int index_y, int* n
 void GenerateMaze_Step(Grid_2D_Device* grid, int index_x, int index_y) {
     // Set index as visited
     int index = index_y * grid->size_x + index_x;
-    grid->data[index] = 0.0f;
+    grid->data[index] = 0;
 
     int* neighbors;
     int neighborCount;
@@ -92,7 +92,7 @@ void GenerateMaze_Step(Grid_2D_Device* grid, int index_x, int index_y) {
         int wallIndex = wallIndex_y * grid->size_x + wallIndex_x;
 
         // Break wall
-        grid->data[wallIndex] = 0.0f;
+        grid->data[wallIndex] = 0;
 
         // Recursive step
         GenerateMaze_Step(grid, neighborIndex_x, neighborIndex_y);
@@ -104,7 +104,7 @@ void GenerateMaze_Step(Grid_2D_Device* grid, int index_x, int index_y) {
 Grid_2D_Device* GenerateMaze(int size_x, int size_y, int startIndex_x, int startIndex_y, int goalIndex_x, int goalIndex_y) {
     // goal unused for now.
 
-    Grid_2D_Device* grid = CreateGrid(size_x, size_y, 2.0f);
+    Grid_2D_Device* grid = CreateGrid(size_x, size_y, 2);
     
     GenerateMaze_Step(grid, startIndex_x, startIndex_y);
 

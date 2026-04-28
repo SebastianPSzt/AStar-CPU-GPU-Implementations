@@ -12,11 +12,11 @@
 
 int main(int argc, char* argv[]) {
     //grid test
-    float* data_ptr = (float*)malloc(sizeof(int));
-    *data_ptr = 0.0f;
+    int* data_ptr = (int*)malloc(sizeof(int));
+    *data_ptr = 0;
 
     //Grid_2D* grid = CreateGrid(5, 5, data_ptr);
-    *data_ptr = 0.0f;
+    *data_ptr = 0;
     //DestroyGrid(grid);
 
     //pq test
@@ -43,11 +43,11 @@ int main(int argc, char* argv[]) {
     //grid2->grid_ptr[5]->data = 2.0;
     //grid2->grid_ptr[6]->data = 2.0;
 
-    Grid_2D_Device* grid3 = CreateGrid(4, 4, 0.0f);
+    Grid_2D_Device* grid3 = CreateGrid(4, 4, 0);
 
-    grid3->data[4] = 2.0f;
-    grid3->data[5] = 2.0f;
-    grid3->data[6] = 2.0f;
+    grid3->data[4] = 2;
+    grid3->data[5] = 2;
+    grid3->data[6] = 2;
 
     time_t prev = time(NULL);
     RunAStar(grid3, 0, 0, 0, 2);
