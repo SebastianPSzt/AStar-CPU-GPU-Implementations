@@ -25,7 +25,7 @@ __constant__ int offset_x[4];
 __constant__ int offset_y[4];
 
 // GPU Helper Functions
-__host__ __device__ int manhattanDistance(int x1, int y1, int x2, int y2) {
+__host__ __device__ static int manhattanDistance(int x1, int y1, int x2, int y2) {
     return abs(y2 - y1) + abs(x2 - x1);
 }
 
@@ -388,7 +388,7 @@ int startIndex, int goalIndex, int bestMeetIndex, AStar_Output* output) {
     free(path_firstHalf);
     free(path_secondHalf);
 
-    printf("----------------------------------------------\n");
+    //printf("----------------------------------------------\n");
 }
 
 void Clean_AStar(int* gScore, int* forward_gScore_d, int* backward_gScore_d, int* gridData_d, int* bucket_sizes_d, 
@@ -407,13 +407,30 @@ int* bucket_nodes_d, int* next_bucket_d, int* bestMeetCost_d, int* bestMeetIndex
     cudaFree(bestMeetIndex_d);
 }
 
-int main(int argc, char* argv[]) {
+void InitGPU_AStar() {
     // Init constant memory
     int offset_xh[4] = {-1, 0, 1, 0};
     int offset_yh[4] = {0, -1, 0, 1};
 
     cudaMemcpyToSymbol(offset_x, offset_xh, sizeof(int) * 4, 0, cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(offset_y, offset_yh, sizeof(int) * 4, 0, cudaMemcpyHostToDevice);
+}
+
+/*
+0  1  2  3
+4  5  6  7
+8  9  10 11
+12 13 14 15
+*/
+
+/*
+Return: (All GPU versions and CPU must have)
+-> Nodes explored ✅
+-> Path (start-goal inclusive) ✅
+-> Best cost ✅
+*/
+
+/*
 
     int gridSize_x = 4;
     int gridSize_y = 4;
@@ -435,18 +452,4 @@ int main(int argc, char* argv[]) {
 
     DestroyGrid(myGrid);
     DestroyOutputContainer(output);
-}
-
-/*
-0  1  2  3
-4  5  6  7
-8  9  10 11
-12 13 14 15
-*/
-
-/*
-Return: (All GPU versions and CPU must have)
--> Nodes explored ✅
--> Path (start-goal inclusive) ✅
--> Best cost ✅
 */

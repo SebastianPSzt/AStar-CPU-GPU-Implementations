@@ -17,7 +17,7 @@ __constant__ int offset_x[4];
 __constant__ int offset_y[4];
 
 // GPU Helper Functions
-__host__ __device__ int manhattanDistance(int x1, int y1, int x2, int y2) {
+__host__ __device__ static int manhattanDistance(int x1, int y1, int x2, int y2) {
     return abs(y2 - y1) + abs(x2 - x1);
 }
 
