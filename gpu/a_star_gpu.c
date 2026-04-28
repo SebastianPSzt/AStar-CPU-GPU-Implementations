@@ -22,7 +22,7 @@ __constant__ int offset_y[4];
 // Texture Memory
 // ........................
 
-__host__ __device__ int ManhattanDistance(int x1, int y1, int x2, int y2) {
+__host__ __device__ static int ManhattanDistance(int x1, int y1, int x2, int y2) {
     return abs(x2 - x1) + abs(y2 - y1);
 }
 

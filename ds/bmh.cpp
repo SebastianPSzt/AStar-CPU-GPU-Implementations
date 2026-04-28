@@ -22,8 +22,8 @@ void HeapifyUp(BinaryMinHeap* bmh, int index) {
 void HeapifyDown(BinaryMinHeap* bmh, int index) {
     Node_BMH* node = bmh->arr[index];
 
-    size_t leftChildIndex = 2 * index + 1;
-    size_t rightChildIndex = 2 * index + 2;
+    int leftChildIndex = 2 * index + 1;
+    int rightChildIndex = 2 * index + 2;
 
     Node_BMH* leftChild = bmh->arr[leftChildIndex];
     Node_BMH* rightChild = bmh->arr[rightChildIndex];
@@ -47,7 +47,7 @@ void HeapifyDown(BinaryMinHeap* bmh, int index) {
     if (leftChild->weight > node->weight && rightChild->weight > node->weight) return;
 
     // Recursive case
-    size_t minChildIndex = leftChild <= rightChild ? leftChildIndex : rightChildIndex;
+    int minChildIndex = leftChild <= rightChild ? leftChildIndex : rightChildIndex;
     bmh->arr[index] = bmh->arr[minChildIndex];
     bmh->arr[minChildIndex] = node;
     HeapifyDown(bmh, minChildIndex);

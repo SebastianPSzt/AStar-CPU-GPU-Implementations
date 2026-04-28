@@ -4,7 +4,7 @@
 #include "../include/grid.h"
 
 Grid_2D_Device* CreateGrid(int size_x, int size_y, int default_val) {
-    size_t totalSize = size_x * size_y;
+    int totalSize = size_x * size_y;
 
     Grid_2D_Device* grid = (Grid_2D_Device*) malloc(sizeof(Grid_2D_Device));
 
@@ -29,6 +29,12 @@ void PrintGrid(Grid_2D_Device* grid) {
         for (int col = 0; col < grid->size_x; col++) 
         {
             size_t index = row * grid->size_x + col;
+            //int data = grid->data[index];
+            //if (data == 0) {
+                //printf("\U00002B1C");
+            //} else {
+                //printf("\U0001F7E5");
+            //}
             printf("%d ", (int)(grid->data[index]));
         }
         printf("\n");

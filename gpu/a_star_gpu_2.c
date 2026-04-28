@@ -13,7 +13,7 @@ __constant__ int offset_x[4];
 __constant__ int offset_y[4];
 
 // GPU
-__device__ void MultiFrontierExpansion(int* frontier_d, int* nextFrontier_d, int frontier_size_h, int* nextFrontier_size_d,
+__global__ void MultiFrontierExpansion(int* frontier_d, int* nextFrontier_d, int frontier_size_h, int* nextFrontier_size_d,
 int* gScore_d, int* parent_d, int gridSize_x, int gridSize_y, int* gridData_d) {
     int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id >= frontier_size_h) return;

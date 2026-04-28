@@ -1,20 +1,24 @@
-CC = gcc
+CXX = nvcc
 
-CFLAGS = -Wall -Werror -g
+CXXFLAGS = -Xcompiler="-Wall -Werror" -g
+NVCCFLAGS = -Xcompiler="-Wall -Werror" -g
 
 TARGET = main
 
-SOURCES = $(shell find . -name "*.c")
+SOURCES = $(shell find . \( -name "*.cpp" -o -name "*.cu" \))
+OBJECTS = $(SOURCES:.cpp=.o)
+OBJECTS := $(OBJECTS:.cu=.o)
 
-OBJECTS = $(SOURCES:.c=.o)
+all: $(TARGET)
 
-ALL: $(TARGET)
+$(TARGET): $(OBJECTS)
+	$(CXX) $(OBJECTS) -o $(TARGET)
 
-$(TARGET) : $(OBJECTS)
-		$(CC) $(OBJECTS) -o $(TARGET)
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -x cu -c $< -o $@
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+%.o: %.cu
+	$(CXX) $(NVCCFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:

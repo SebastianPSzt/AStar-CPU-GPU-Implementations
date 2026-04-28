@@ -9,5 +9,6 @@ void Init_AStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int go
 int GetPathFromStartToGoal(Grid_2D_Device* grid, int* gScore, int startIndex, int goalIndex, int* path);
 void Print_AStar(Grid_2D_Device* grid, int reachedPath, int bestCost, int* forward_gScore_h, int* backward_gScore_h, int startIndex, int goalIndex, int bestMeetIndex, AStar_Output* output);
 void Clean_AStar(int* gScore, int* forward_gScore_d, int* backward_gScore_d, int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, int* bestMeetCost_d, int* bestMeetIndex_d);
+void InitGPU_AStar();
 
 #endif

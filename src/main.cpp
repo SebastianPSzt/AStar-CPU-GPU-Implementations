@@ -1,45 +1,10 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#include "../include/grid.h"
-#include "../include/pq.h"
-#include "../include/bmh.h"
-#include "../include/a_star_cpu.h"
-#include "../include/ndgrid_tests.h"
-#include "../include/dfs_maze_generator.h"
-
+#include "../include/correctness.h"
 
 int main(int argc, char* argv[]) {
-    printf("---------------A* Testing---------------\n");
-    Grid_2D_Device* grid3 = CreateGrid(4, 4, 0);
-    AStar_Output* output = InitOutputContainer(4 * 4);
-
-    grid3->data[4] = 2;
-    grid3->data[5] = 2;
-    grid3->data[6] = 2;
-
-    RunAStar(grid3, 0, 0, 0, 2, output);
-    
-    printf("Best cost: %d, nodes explored: %d, path length: %d\n", output->bestCost, output->nodesExplored, output->pathSize);
-
-    if (output->validPath) {
-        for (int i = 0; i < output->pathSize; i++) {
-            printf("Node: %d\n", output->path[i]);
-        }
-    }
-
-    DestroyGrid(grid3);
-    DestroyOutputContainer(output);
-
-    printf("---------------Maze Generator Testing---------------\n");
-    int* seed = (int*)malloc(sizeof(int));
-    *seed = 4;
-
-    Grid_2D_Device* grid4 = GenerateMaze(10, 10, 0, 0, 4, 2, seed);
-    PrintGrid(grid4);
-    
-    free(seed);
-
+    testCorrectness();
     return 0;
 }
 
@@ -98,3 +63,35 @@ int main(int argc, char* argv[]) {
     // NDGrid Testing
     EmptyGrid_Test(4, 3);
     */
+
+/*
+    printf("---------------A* Testing---------------\n");
+    Grid_2D_Device* grid3 = CreateGrid(4, 4, 0);
+    AStar_Output* output = InitOutputContainer(4 * 4);
+
+    grid3->data[4] = 2;
+    grid3->data[5] = 2;
+    grid3->data[6] = 2;
+
+    RunAStar(grid3, 0, 0, 0, 2, output);
+    
+    printf("Best cost: %d, nodes explored: %d, path length: %d\n", output->bestCost, output->nodesExplored, output->pathSize);
+
+    if (output->validPath) {
+        for (int i = 0; i < output->pathSize; i++) {
+            printf("Node: %d\n", output->path[i]);
+        }
+    }
+
+    DestroyGrid(grid3);
+    DestroyOutputContainer(output);
+
+    printf("---------------Maze Generator Testing---------------\n");
+    int* seed = (int*)malloc(sizeof(int));
+    *seed = 4;
+
+    Grid_2D_Device* grid4 = GenerateMaze(10, 10, 0, 0, 4, 2, seed);
+    PrintGrid(grid4);
+    
+    free(seed);
+*/
