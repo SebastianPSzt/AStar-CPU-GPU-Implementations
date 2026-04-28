@@ -144,14 +144,7 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
     fprintf(stderr, "Error<RunAStar>: Could not reach goal!\n");
 }
 
-void InitAStar() {
-
-}
-
-void PrintAStar() {
-
-}
-
-void FreeAStar() {
-
+void PrintAStar(Grid_2D_Device* grid, int startIndex, int goalIndex) {
+    int index = goalIndex;
+    while (index != startIndex) {}
 }
