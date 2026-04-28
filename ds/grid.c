@@ -88,7 +88,7 @@ Grid_2D *GatherGrid(const char *path)
 
     cJSON *width_json = cJSON_GetObjectItemCaseSensitive(root, "width");
     cJSON *height_json = cJSON_GetObjectItemCaseSensitive(root, "height");
-    cJSON *grid_json = cJSON_GetObjectItemCaseSensitive(root, "grid");
+    cJSON *grid_json = cJSON_GetObjectItemCaseSensitive(root, "_grid");
     cJSON *threshold_json = cJSON_GetObjectItemCaseSensitive(root, "threshold");
 
     if (!cJSON_IsNumber(width_json) ||

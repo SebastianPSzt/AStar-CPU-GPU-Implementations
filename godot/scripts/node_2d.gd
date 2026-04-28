@@ -1,10 +1,10 @@
 extends Node2D
 
-var width = 2014
-var height = 1024
+var width = 512
+var height = 512
 var perlin_scale = 0.75
 var threshold = 0.15
-var cell_size = 1
+var cell_size = 2
 var this_seed = randi()
 var save_path = "C:/Users/thysv/source/AStar-CPU-GPU-Implementations/godot/grids/region.json"
 
@@ -35,14 +35,14 @@ func save_noise_to_json(path: String):
 		"perlin_scale": perlin_scale,
 		"threshold": threshold,
 		"cell_size": cell_size,
-		"grid": []
+		"_grid": []
 	}
 
 	for y in range(height):
 		var row = []
 		for x in range(width):
 			row.append(grid[y][x]["noise"])
-		save_data["grid"].append(row)
+		save_data["_grid"].append(row)
 
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
