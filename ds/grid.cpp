@@ -2,6 +2,7 @@
 #include<stdlib.h>
 
 #include "grid.h"
+#include "cJSON.h"
 
 Grid_2D_Device* CreateGrid(int size_x, int size_y, int default_val) {
     int totalSize = size_x * size_y;
@@ -181,10 +182,10 @@ Grid_2D_Device *GatherGrid(const char *path)
     int size_x = width_json->valueint;
     int size_y = height_json->valueint;
     double threshold = threshold_json->valuedouble;
-    float default_val = 0.0f;
-    float blocked_val = 2.0f;
+    int default_val = 0;
+    int blocked_val = 2;
 
-    Grid_2D *grid = CreateGrid(size_x, size_y, &default_val);
+    Grid_2D_Device *grid = CreateGrid(size_x, size_y, default_val);
     if (!grid)
     {
         cJSON_Delete(root);
@@ -217,7 +218,7 @@ Grid_2D_Device *GatherGrid(const char *path)
 
             if (val > threshold)
             {
-                UpdateGridByIndex(grid, row, col, &blocked_val);
+                UpdateGridByIndex(grid, row, col, blocked_val);
             }
         }
     }

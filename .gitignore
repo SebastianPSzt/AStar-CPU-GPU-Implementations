@@ -1,1 +1,4 @@
 */.godot/
+*.obj
+*.o
+.sconsign.dblite

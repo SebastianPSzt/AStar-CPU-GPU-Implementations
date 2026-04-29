@@ -151,6 +151,13 @@ void RunAStar(Grid_2D_Device* grid, int startIndex_x, int startIndex_y, int goal
             if (gridData[neighborId]==2.0) continue;
             if (gridData[neighborId]==1.0) continue; // Must be removed to get optimal path if heuristic function is not consistent
 
+            Output_Node* node = new Output_Node;
+            node->ids_explored = new int[1];
+            node->ids_explored[0] = currentId;
+            node->num_explored = 1;
+            node->next = output->history;
+            output->history = node;
+
             int tentative_gScore = gScore[currentId] + 1;
             if (tentative_gScore < gScore[neighborId]) {
                 parent[neighborId] = currentId;

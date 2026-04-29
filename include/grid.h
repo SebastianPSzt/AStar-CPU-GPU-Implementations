@@ -22,6 +22,7 @@ typedef struct Grid_ND {
 // Functions
 // 2D
 Grid_2D_Device* CreateGrid(int size_x, int size_y, int default_val);
+Grid_2D_Device* GatherGrid(const char *path);
 void UpdateGridByIndex(Grid_2D_Device* grid, int row, int col, int val);
 void PrintGrid(Grid_2D_Device* grid);
 void DestroyGrid(Grid_2D_Device* grid);
