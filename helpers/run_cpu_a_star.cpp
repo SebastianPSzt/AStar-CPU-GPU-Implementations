@@ -5,6 +5,7 @@
 #include "../include/pq.h"
 #include "../include/bmh.h"
 #include "../include/a_star_cpu.h"
+#include "../include/run_cpu_a_star.h"
 
 void run(const char *path_in, const char *path_out)
 {
@@ -24,6 +25,8 @@ void run(const char *path_in, const char *path_out)
         return;
     }
 
+
+
     if (start_x < 0 || start_x >= grid->size_x ||
         start_y < 0 || start_y >= grid->size_y ||
         goal_x < 0 || goal_x >= grid->size_x ||
@@ -33,13 +36,17 @@ void run(const char *path_in, const char *path_out)
         return;
     }
 
-    AStar_Output* output_cpu = InitOutputContainer(grid->size_x * grid->size_y);
+    AStar_Output *output_cpu = InitOutputContainer(grid->size_x * grid->size_y);
+    if (!output_cpu) {
+        DestroyGrid(grid);
+        return;
+    }
     RunAStar(grid, start_x, start_y, goal_x, goal_y, output_cpu);
 
     ReverseHistory(output_cpu);
     PrintOutputHistory(output_cpu, path_out);
 
+    DestroyOutputContainer(output_cpu);
     DestroyGrid(grid);
-
     return;
 }

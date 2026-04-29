@@ -26,6 +26,7 @@ Grid_2D_Device* GatherGrid(const char *path);
 void UpdateGridByIndex(Grid_2D_Device* grid, int row, int col, int val);
 void PrintGrid(Grid_2D_Device* grid);
 void DestroyGrid(Grid_2D_Device* grid);
+int ReadGridByIndex(Grid_2D_Device* grid, int row, int col);
 
 // ND
 Grid_ND* CreateNDGrid(int* sizes, int dimension, int default_val);

@@ -3,6 +3,7 @@
 
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/core/binder_common.hpp>
+#include <godot_cpp/variant/string.hpp>
 
 namespace godot
 {

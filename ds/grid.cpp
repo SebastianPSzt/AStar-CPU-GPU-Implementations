@@ -1,8 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#include "grid.h"
-#include "cJSON.h"
+#include "../include/grid.h"
+#include "../include/cJSON.h"
 
 Grid_2D_Device* CreateGrid(int size_x, int size_y, int default_val) {
     int totalSize = size_x * size_y;
@@ -225,4 +225,15 @@ Grid_2D_Device *GatherGrid(const char *path)
 
     cJSON_Delete(root);
     return grid;
+}
+
+int ReadGridByIndex(Grid_2D_Device* grid, int row, int col) {
+    if (grid == nullptr) return -1;
+
+    if (row < 0 || row >= grid->size_y ||
+        col < 0 || col >= grid->size_x) {
+        return -1;
+    }
+
+    return grid->data[row * grid->size_x + col];
 }

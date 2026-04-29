@@ -19,17 +19,20 @@ env.Append(LIBS=[
 ])
 
 sources = [
-    "src/astar_cpu_wrapper.cpp",
-    "src/run_cpu_astar.c",
-    "src/a_star_cpu.c",
-    "src/search_log_cpu.c",
-    "ds/bmh.c",
-    "ds/grid.c",
-    "include/cJSON.c",
-    "godot_cpp/register_types.cpp"
+    "ds/bmh.cpp",
+    "ds/grid.cpp",
+    "ds/pq.cpp",
+
+    "helpers/a_star_cpu_wrapper.cpp",
+    "helpers/a_star_output.cpp",
+    "helpers/cJSON.c",
+    "helpers/run_cpu_a_star.cpp",
+    "helpers/register_types.cpp",
+
+    "src/a_star_cpu.cpp",
 ]
 
 env.SharedLibrary(
-    target="godot/bin/astar_cpu_wrapper",
+    target="godot/bin/a_star_cpu_wrapper",
     source=sources
 )

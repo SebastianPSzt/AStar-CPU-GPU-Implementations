@@ -54,7 +54,7 @@ void HeapifyDown(BinaryMinHeap* bmh, int index) {
 }
 
 BinaryMinHeap* Init_BMH(int max_size) {
-    BinaryMinHeap* bmh = (BinaryMinHeap*)malloc(sizeof(bmh));
+    BinaryMinHeap* bmh = (BinaryMinHeap*)malloc(sizeof(BinaryMinHeap));
     bmh->arr = (Node_BMH**) malloc(sizeof(Node_BMH*) * max_size);
     bmh->size = 0;
     bmh->maxSize = max_size;

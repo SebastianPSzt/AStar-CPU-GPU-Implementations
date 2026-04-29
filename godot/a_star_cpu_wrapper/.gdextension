@@ -1,0 +1,6 @@
+[configuration]
+entry_symbol = "a_star_library_init"
+compatibility_minimum = "4.2"
+
+[libraries]
+windows.debug.x86_64 = "res://bin/a_star_cpu_wrapper.dll"
