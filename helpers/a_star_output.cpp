@@ -61,6 +61,20 @@ void PrintOutputHistory(AStar_Output *output, const char *filename)
         return;
     }
 
+    // First line: correct path
+    for (int i = 0; i < output->pathSize; i++)
+    {
+        fprintf(file, "%d", output->path[i]);
+
+        if (i < output->pathSize - 1)
+        {
+            fprintf(file, ",");
+        }
+    }
+
+    fprintf(file, "\n");
+
+    // Remaining lines: explored history
     for (Output_Node *curr = output->history; curr != nullptr; curr = curr->next)
     {
         for (int i = 0; i < curr->num_explored; i++)

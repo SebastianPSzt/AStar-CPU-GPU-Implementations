@@ -161,6 +161,61 @@ int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, i
         free(bucket_sizes_h);
 
         if (currentBucket == -1) break;
+
+        // --------------------------------------------------
+        // Save all nodes currently on this frontier to output
+        // --------------------------------------------------
+        printf("---- Frontier Debug ----\n");
+        printf("Bucket: %d, Size: %d\n", currentBucket, currentBucketSize);
+
+        int* frontier_nodes_h = (int*)malloc(sizeof(int) * currentBucketSize);
+        if (!frontier_nodes_h) {
+            printf("Malloc failed\n");
+            return;
+        }
+
+        cudaError_t err = cudaMemcpy(
+            frontier_nodes_h,
+            &bucket_nodes_d[currentBucket * MAX_BUCKET_SIZE],
+            sizeof(int) * currentBucketSize,
+            cudaMemcpyDeviceToHost
+        );
+
+        if (err != cudaSuccess) {
+            printf("cudaMemcpy failed: %s\n", cudaGetErrorString(err));
+            free(frontier_nodes_h);
+            return;
+        }
+
+        printf("First few raw nodes:\n");
+        for (int i = 0; i < currentBucketSize && i < 10; i++) {
+            printf("%d ", frontier_nodes_h[i]);
+        }
+        printf("\n");
+
+        Output_Node* node = new Output_Node;
+        node->ids_explored = new int[currentBucketSize];
+        node->num_explored = currentBucketSize;
+        node->next = output->history;
+
+        printf("Decoded indices:\n");
+        for (int i = 0; i < currentBucketSize; i++) {
+            int decoded = frontier_nodes_h[i] >> 1;
+            node->ids_explored[i] = decoded;
+
+            if (i < 10) {
+                printf("%d ", decoded);
+            }
+        }
+        printf("\n");
+
+        output->history = node;
+
+        printf("History head now has %d nodes\n", node->num_explored);
+
+        free(frontier_nodes_h);
+        printf("------------------------\n");
+        // --------------------------------------------------
         
         // Count number of nodes explored
         output->nodesExplored += currentBucketSize;
@@ -173,11 +228,29 @@ int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, i
         forward_gScore_d, backward_gScore_d, gridSize_x, gridSize_y, gridData_d, startIndex_x, startIndex_y, goalIndex_x, goalIndex_y, bestMeetCost_d, bestMeetIndex_d);
         cudaDeviceSynchronize();
 
-        // Get # elements added to current bucket
-        int newBucketSize;
-        cudaMemcpy(&newBucketSize, &bucket_sizes_d[currentBucket], sizeof(int), cudaMemcpyDeviceToHost);
-        newBucketSize -= currentBucketSize;
+        // --- Check kernel ---
+        cudaError_t kerr = cudaGetLastError();
+        if (kerr != cudaSuccess) {
+            printf("Kernel launch error: %s\n", cudaGetErrorString(kerr));
+        }
 
+        cudaError_t syncErr = cudaDeviceSynchronize();
+        if (syncErr != cudaSuccess) {
+            printf("Kernel sync error: %s\n", cudaGetErrorString(syncErr));
+        }
+
+        // --- Get bucket size AFTER kernel ---
+        int rawBucketSize;
+        cudaMemcpy(&rawBucketSize, &bucket_sizes_d[currentBucket], sizeof(int), cudaMemcpyDeviceToHost);
+
+        printf("Bucket %d old size: %d, raw device size after kernel: %d\n",
+            currentBucket, currentBucketSize, rawBucketSize);
+
+        // --- Compute how many NEW nodes were added ---
+        int newBucketSize = rawBucketSize - currentBucketSize;
+
+        printf("New nodes added to SAME bucket: %d\n", newBucketSize);
+        
         // Shift new elements to beginning of bucket
         // -> Potential bottleneck, better to update start/end ptrs
         if (newBucketSize > 0) {
@@ -194,6 +267,7 @@ int* gridData_d, int* bucket_sizes_d, int* bucket_nodes_d, int* next_bucket_d, i
         // Additional termination condition : small enough best total cost between both directions
         int bestMeetCost_h;
         cudaMemcpy(&bestMeetCost_h, bestMeetCost_d, sizeof(int), cudaMemcpyDeviceToHost);
+        printf("bestMeetCost_h: %d, cutoff: %d\n", bestMeetCost_h, currentBucket * DELTA);
         if (bestMeetCost_h <= currentBucket * DELTA) break;
     }
 }

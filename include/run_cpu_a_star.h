@@ -6,7 +6,7 @@ extern "C"
 {
 #endif
 
-    void run(const char *path_in, const char *path_out);
+    void run_cpu(const char *path_in, const char *path_out);
 
 #ifdef __cplusplus
 }

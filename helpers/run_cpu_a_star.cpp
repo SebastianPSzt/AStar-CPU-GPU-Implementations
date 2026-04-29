@@ -7,7 +7,7 @@
 #include "../include/a_star_cpu.h"
 #include "../include/run_cpu_a_star.h"
 
-void run(const char *path_in, const char *path_out)
+void run_cpu(const char *path_in, const char *path_out)
 {
     Grid_2D_Device *grid = GatherGrid(path_in);
 

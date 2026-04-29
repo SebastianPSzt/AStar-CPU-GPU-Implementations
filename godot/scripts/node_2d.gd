@@ -1,11 +1,16 @@
 extends Node2D
 
-var width = 128
-var height = 128
-var perlin_scale = 0.75
-var threshold = 0.15
-var cell_size = 8
-var this_seed = 2484144148
+#var width = 128
+#var height = 128
+#var cell_size = 8
+
+var width = 512
+var height = 512
+var cell_size = 2
+
+var perlin_scale = 0.5
+var threshold = 0.1
+var this_seed = randi()
 
 var save_path = "C:/Users/thysv/source/AStar-CPU-GPU-Implementations/godot/grids/region.json"
 
@@ -22,9 +27,19 @@ var path_order = []
 var path_index = 0
 var cells_per_frame = 1
 
+var frontier_order = []
+var frontier_index = 0
+var current_green_frontier = []
+
+var frontier_hold_frames = 5
+var frontier_frames_left = 0
+
 var last_green_cell: Vector2i = Vector2i(-1, -1)
 var green_hold_frames = 5
 var green_frames_left = 0
+
+var correct_path_texture: ImageTexture
+var correct_path_cells = {}
 
 func _ready() -> void:
 	noise.noise_type = FastNoiseLite.TYPE_PERLIN
@@ -38,8 +53,15 @@ func _ready() -> void:
 
 	var abs_path_region = ProjectSettings.globalize_path("res://grids/region.json")
 	var abs_path_result = ProjectSettings.globalize_path("res://grids/result.txt")
+	
+	#var cpu = AStarCPUWrapper.new()
+	#cpu.run("res://input.json", "res://cpu.csv")
+#
+	#var gpu = AStarGPU4Wrapper.new()
+	#gpu.run("res://input.json", "res://gpu.csv")
 
-	var wrapper = RunWrapper.new()
+	var wrapper = RunGPU4Wrapper.new()
+	#var wrapper = RunCPUWrapper.new()
 	add_child(wrapper)
 	wrapper.run(abs_path_region, abs_path_result)
 
@@ -48,6 +70,15 @@ func _ready() -> void:
 	build_path_texture()
 
 	queue_redraw()
+	
+func build_correct_path_texture():
+	var img = Image.create(width, height, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+
+	for pos in correct_path_cells.keys():
+		img.set_pixel(pos.x, pos.y, Color(0.25, 0.8, 1.0, 0.75))
+
+	correct_path_texture = ImageTexture.create_from_image(img)
 
 
 func _draw():
@@ -62,25 +93,41 @@ func _draw():
 	if path_texture:
 		draw_texture_rect(path_texture, draw_size, false)
 
+	if correct_path_texture:
+		draw_texture_rect(correct_path_texture, draw_size, false)
+
+	# draw current frontier on top
+	for pos in current_green_frontier:
+		draw_rect(
+			Rect2(pos.x * cell_size, pos.y * cell_size, cell_size, cell_size),
+			Color.GREEN
+		)
+
 func _process(_delta):
-	if green_frames_left > 0:
-		green_frames_left -= 1
+	if frontier_frames_left > 0:
+		frontier_frames_left -= 1
 		return
 
-	if last_green_cell.x != -1:
-		path_img.set_pixel(last_green_cell.x, last_green_cell.y, Color.RED)
+	# Turn previous green frontier red
+	for pos in current_green_frontier:
+		path_img.set_pixel(pos.x, pos.y, Color.RED)
 
-	if path_index >= path_order.size():
+	current_green_frontier.clear()
+
+	if frontier_index >= frontier_order.size():
 		path_texture.update(path_img)
 		queue_redraw()
 		return
 
-	var pos = path_order[path_index]
-	path_img.set_pixel(pos.x, pos.y, Color.GREEN)
+	# Draw next frontier all at once
+	var frontier = frontier_order[frontier_index]
 
-	last_green_cell = pos
-	path_index += 1
-	green_frames_left = green_hold_frames
+	for pos in frontier:
+		path_img.set_pixel(pos.x, pos.y, Color.GREEN)
+		current_green_frontier.append(pos)
+
+	frontier_index += 1
+	frontier_frames_left = frontier_hold_frames
 
 	path_texture.update(path_img)
 	queue_redraw()
@@ -134,28 +181,56 @@ func save_noise_to_json(path: String):
 func load_result_from_txt(path: String):
 	explored_cells.clear()
 	path_order.clear()
-	path_index = 0
+	frontier_order.clear()
+	frontier_index = 0
+	current_green_frontier.clear()
 
 	var file = FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		print("Failed to open result file: ", path)
 		return
 
+	# --- FIRST LINE: CORRECT PATH ---
+	if not file.eof_reached():
+		var line = file.get_line().strip_edges()
+		if line != "":
+			var parts = line.split(",")
+
+			for part in parts:
+				var id = part.to_int()
+				var x = id % width
+				var y = int(id / width)
+				var pos = Vector2i(x, y)
+
+				if x >= 0 and x < width and y >= 0 and y < height:
+					correct_path_cells[pos] = true
+
+	# # --- REMAINING LINES: HISTORY ---
 	while not file.eof_reached():
 		var line = file.get_line().strip_edges()
 		if line == "":
 			continue
 
-		var id = line.to_int()
-		var x = id % width
-		var y = int(id / width)
-		var pos = Vector2i(x, y)
+		var parts = line.split(",")
+		var frontier = []
 
-		if x >= 0 and x < width and y >= 0 and y < height:
-			explored_cells[pos] = true
-			path_order.append(pos)
+		for part in parts:
+			var id = part.to_int()
+			var x = id % width
+			var y = int(id / width)
+			var pos = Vector2i(x, y)
+
+			if x >= 0 and x < width and y >= 0 and y < height:
+				explored_cells[pos] = true
+				frontier.append(pos)
+
+		if frontier.size() > 0:
+			frontier_order.append(frontier)
 
 	file.close()
+
+	# Build correct path texture AFTER loading
+	build_correct_path_texture()
 
 
 func build_grid_texture():
@@ -185,7 +260,8 @@ func build_path_texture():
 	path_img.fill(Color(0, 0, 0, 0))
 
 	path_texture = ImageTexture.create_from_image(path_img)
-	path_index = 0
+	frontier_index = 0
+	current_green_frontier.clear()
 
 
 func setup_camera():

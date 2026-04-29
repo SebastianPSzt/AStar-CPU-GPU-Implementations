@@ -1,5 +1,6 @@
 // src/register_types.cpp
 #include "../include/a_star_cpu_wrapper.h"
+#include "../include/a_star_gpu4_wrapper.h"
 
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/godot.hpp>
@@ -13,7 +14,8 @@ void initialize_astar(ModuleInitializationLevel p_level)
         return;
     }
 
-    ClassDB::register_class<RunWrapper>();
+    ClassDB::register_class<RunCPUWrapper>();
+    ClassDB::register_class<RunGPU4Wrapper>();
 }
 
 void uninitialize_astar(ModuleInitializationLevel p_level)
