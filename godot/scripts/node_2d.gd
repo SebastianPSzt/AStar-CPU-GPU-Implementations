@@ -4,13 +4,17 @@ extends Node2D
 #var height = 128
 #var cell_size = 8
 
-var width = 512
-var height = 512
-var cell_size = 2
+var width = 1024
+var height = 1024
+var cell_size = 1
 
-var perlin_scale = 0.5
+var perlin_scale = 1.5
 var threshold = 0.1
+#var this_seed = 3842849903
 var this_seed = randi()
+
+#var wrapper = RunCPUWrapper.new()
+var wrapper = RunGPU4Wrapper.new()
 
 var save_path = "C:/Users/thysv/source/AStar-CPU-GPU-Implementations/godot/grids/region.json"
 
@@ -25,7 +29,6 @@ var path_img: Image
 var explored_cells = {}
 var path_order = []
 var path_index = 0
-var cells_per_frame = 1
 
 var frontier_order = []
 var frontier_index = 0
@@ -54,14 +57,6 @@ func _ready() -> void:
 	var abs_path_region = ProjectSettings.globalize_path("res://grids/region.json")
 	var abs_path_result = ProjectSettings.globalize_path("res://grids/result.txt")
 	
-	#var cpu = AStarCPUWrapper.new()
-	#cpu.run("res://input.json", "res://cpu.csv")
-#
-	#var gpu = AStarGPU4Wrapper.new()
-	#gpu.run("res://input.json", "res://gpu.csv")
-
-	var wrapper = RunGPU4Wrapper.new()
-	#var wrapper = RunCPUWrapper.new()
 	add_child(wrapper)
 	wrapper.run(abs_path_region, abs_path_result)
 

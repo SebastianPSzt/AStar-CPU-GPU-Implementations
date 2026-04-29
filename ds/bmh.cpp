@@ -20,36 +20,27 @@ void HeapifyUp(BinaryMinHeap* bmh, int index) {
 }
 
 void HeapifyDown(BinaryMinHeap* bmh, int index) {
+    if (index >= bmh->size) return;
+
     Node_BMH* node = bmh->arr[index];
 
     int leftChildIndex = 2 * index + 1;
     int rightChildIndex = 2 * index + 2;
 
-    Node_BMH* leftChild = bmh->arr[leftChildIndex];
-    Node_BMH* rightChild = bmh->arr[rightChildIndex];
-
-    // Case both children indices out of bounds
     if (leftChildIndex >= bmh->size) return;
 
-    // Case right child index out of bounds (recursive)
-    if (rightChildIndex >= bmh->size)
-    {
-        if (leftChild->weight <= node->weight)
-        {
-            bmh->arr[leftChildIndex] = node;
-            bmh->arr[index] = leftChild;
-            HeapifyDown(bmh, leftChildIndex);
-        }
-        return;
+    int minChildIndex = leftChildIndex;
+
+    if (rightChildIndex < bmh->size &&
+        bmh->arr[rightChildIndex]->weight < bmh->arr[leftChildIndex]->weight) {
+        minChildIndex = rightChildIndex;
     }
 
-    // Neither child is less than current index
-    if (leftChild->weight > node->weight && rightChild->weight > node->weight) return;
+    if (bmh->arr[minChildIndex]->weight >= node->weight) return;
 
-    // Recursive case
-    int minChildIndex = leftChild <= rightChild ? leftChildIndex : rightChildIndex;
     bmh->arr[index] = bmh->arr[minChildIndex];
     bmh->arr[minChildIndex] = node;
+
     HeapifyDown(bmh, minChildIndex);
 }
 
@@ -100,17 +91,24 @@ void RemoveMin_BMH(BinaryMinHeap* bmh) {
 }
 
 void UpdateWeight_BMH(BinaryMinHeap* bmh, int id, int weight) {
-    // Return if invalid index
-    if (id >= bmh->size) return;
+    int index = -1;
 
-    // Update weight
-    Node_BMH* node = bmh->arr[id];
-    node->weight = weight;
-    
-    // Heapify both up and down to ensure proper placement
-    HeapifyUp(bmh,id);
-    HeapifyDown(bmh, id);
+    for (int i = 0; i < bmh->size; i++) {
+        if (bmh->arr[i]->id == id) {
+            index = i;
+            break;
+        }
+    }
 
+    if (index == -1) return;
+
+    int oldWeight = bmh->arr[index]->weight;
+    bmh->arr[index]->weight = weight;
+
+    if (weight < oldWeight)
+        HeapifyUp(bmh, index);
+    else
+        HeapifyDown(bmh, index);
 }
 
 Node_BMH* GetElementById_BMH(BinaryMinHeap* bmh, int id) {
